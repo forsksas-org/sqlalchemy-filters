@@ -9,7 +9,7 @@ versions, where semantic versioning is used: *major.minor.patch*.
 
 Released 2023-03-20
 
-* get_query_models: Remove None elements when requesting the dictionary 
+* get_query_models: Remove None elements when requesting the dictionary
   with all the models included in the query.
 
 0.12.2
