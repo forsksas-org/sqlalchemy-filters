@@ -42,12 +42,12 @@ class Field(object):
         orm_descriptors = inspect_mapper.all_orm_descriptors
 
         column_names = columns.keys()
-        hybrid_names = [
+        accepted_descriptors = [
             key for key, item in orm_descriptors.items()
-            if _is_hybrid_property(item) or _is_hybrid_method(item)
+            if _is_accepted_orm_descriptor(item)
         ]
 
-        return set(column_names) | set(hybrid_names)
+        return set(column_names) | set(accepted_descriptors)
 
 
 def _is_hybrid_property(orm_descriptor):
@@ -56,6 +56,18 @@ def _is_hybrid_property(orm_descriptor):
 
 def _is_hybrid_method(orm_descriptor):
     return orm_descriptor.extension_type == symbol('HYBRID_METHOD')
+
+
+def _is_association_proxy(orm_descriptor):
+    return orm_descriptor.extension_type == symbol('ASSOCIATION_PROXY')
+
+
+def _is_accepted_orm_descriptor(orm_descriptor):
+    return orm_descriptor.extension_type in [
+        symbol('HYBRID_PROPERTY'),
+        symbol('HYBRID_METHOD'),
+        symbol('ASSOCIATION_PROXY')
+      ]
 
 
 def get_model_from_table(table):  # pragma: nocover
