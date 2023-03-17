@@ -90,6 +90,8 @@ def get_query_models(query):
         A dictionary with all the models included in the query.
     """
     models = [col_desc['entity'] for col_desc in query.column_descriptions]
+    # remove None in case of columns not in models
+    models = list(filter(lambda item: item is not None, models))
 
     # account joined entities
     if sqlalchemy_version_lt('1.4'):  # pragma: nocover
