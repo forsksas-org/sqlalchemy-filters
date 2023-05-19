@@ -50,6 +50,33 @@ class Field(object):
         return set(column_names) | set(accepted_descriptors)
 
 
+class TableField(object):
+
+    def __init__(self, table, field_name):
+        self.table = table
+        self.field_name = field_name
+
+    def get_sqlalchemy_field(self):
+        if self.field_name not in self._get_valid_field_names():
+            raise FieldNotFound(
+                'Model {} has no column `{}`.'.format(
+                    self.table, self.field_name
+                )
+            )
+        sqlalchemy_field = getattr(self.table.c, self.field_name)
+
+        # If it's a hybrid method, then we call it so that we can work with
+        # the result of the execution and not with the method object itself
+        if isinstance(sqlalchemy_field, types.MethodType):
+            sqlalchemy_field = sqlalchemy_field()
+
+        return sqlalchemy_field
+
+    def _get_valid_field_names(self):
+        column_names = set(c.key for c in inspect(self.table).columns)
+        return column_names
+
+
 def _is_hybrid_property(orm_descriptor):
     return orm_descriptor.extension_type == symbol('HYBRID_PROPERTY')
 
@@ -67,7 +94,7 @@ def _is_accepted_orm_descriptor(orm_descriptor):
         symbol('HYBRID_PROPERTY'),
         symbol('HYBRID_METHOD'),
         symbol('ASSOCIATION_PROXY')
-      ]
+    ]
 
 
 def get_model_from_table(table):  # pragma: nocover

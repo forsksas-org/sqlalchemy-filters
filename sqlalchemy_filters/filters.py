@@ -16,9 +16,10 @@ from itertools import chain
 
 from six import string_types
 from sqlalchemy import and_, or_, not_, func
+import sqlalchemy.sql.schema
 
 from .exceptions import BadFilterFormat
-from .models import Field, auto_join, get_model_from_spec, get_default_model
+from .models import Field, TableField, auto_join, get_model_from_spec, get_default_model
 
 
 BooleanFunction = namedtuple(
@@ -102,13 +103,16 @@ class Filter(object):
         operator = self.operator
         value = self.value
 
-        model = get_model_from_spec(filter_spec, query, default_model)
-
         function = operator.function
         arity = operator.arity
 
         field_name = self.filter_spec['field']
-        field = Field(model, field_name)
+        if isinstance(default_model, sqlalchemy.sql.schema.Table):
+            # raw API
+            field = TableField(default_model, field_name)
+        else:
+            model = get_model_from_spec(filter_spec, query, default_model)
+            field = Field(model, field_name)
         sqlalchemy_field = field.get_sqlalchemy_field()
 
         if arity == 1:
@@ -232,11 +236,16 @@ def apply_filters(query, filter_spec, do_auto_join=True):
     """
     filters = build_filters(filter_spec)
 
-    default_model = get_default_model(query)
-
-    filter_models = get_named_models(filters)
-    if do_auto_join:
-        query = auto_join(query, *filter_models)
+    table = query._raw_columns[0]
+    is_table_query = isinstance(table, sqlalchemy.sql.schema.Table)
+    if is_table_query:
+        # raw API, feature subset
+        default_model = table
+    else:
+        default_model = get_default_model(query)
+        filter_models = get_named_models(filters)
+        if do_auto_join:
+            query = auto_join(query, *filter_models)
 
     sqlalchemy_filters = [
         filter.format_for_sqlalchemy(query, default_model)
