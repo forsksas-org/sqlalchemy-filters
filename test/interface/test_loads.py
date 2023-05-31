@@ -146,7 +146,8 @@ class TestLoadsApplied(object):
         )
         assert str(restricted_query) == expected
 
-    def test_multiple_values_multiple_models_lazy_load(self, session, db_uri, only_sqlalchemy_1):
+    def test_multiple_values_multiple_models_lazy_load(self, session, db_uri,
+                                                       only_sqlalchemy_1):
 
         query = session.query(Foo).join(Bar)
         loads = [

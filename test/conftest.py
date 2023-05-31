@@ -159,7 +159,7 @@ def session(connection, is_postgresql):
 @pytest.fixture()
 def only_sqlalchemy_1():
     if is_sqlalchemy_version_2:
-        pytest.skip('TODO')
+        pytest.skip('TODO sqlalchemy 2')
     return True
 
 
