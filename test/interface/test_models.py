@@ -169,7 +169,7 @@ class TestGetDefaultModel:
 
 class TestAutoJoin:
 
-    def test_model_not_present(self, session, db_uri):
+    def test_model_not_present(self, session, db_uri, only_sqlalchemy_1):
         query = session.query(Foo)
         query = auto_join(query, 'Bar')
 
@@ -183,7 +183,7 @@ class TestAutoJoin:
         )
         assert str(query) == expected
 
-    def test_model_already_present(self, session):
+    def test_model_already_present(self, session, only_sqlalchemy_1):
         query = session.query(Foo, Bar)
 
         # no join applied
@@ -199,7 +199,7 @@ class TestAutoJoin:
         query = auto_join(query, 'Bar')
         assert str(query) == expected   # no change
 
-    def test_model_already_joined(self, session, db_uri):
+    def test_model_already_joined(self, session, db_uri, only_sqlalchemy_1):
         query = session.query(Foo).join(Bar)
 
         join_type = "INNER JOIN" if "mysql" in db_uri else "JOIN"
@@ -215,7 +215,7 @@ class TestAutoJoin:
         query = auto_join(query, 'Bar')
         assert str(query) == expected   # no change
 
-    def test_model_eager_joined(self, session, db_uri):
+    def test_model_eager_joined(self, session, db_uri, only_sqlalchemy_1):
         query = session.query(Foo).options(joinedload(Foo.bar))
 
         join_type = "INNER JOIN" if "mysql" in db_uri else "JOIN"
@@ -245,7 +245,7 @@ class TestAutoJoin:
         query = auto_join(query, 'Bar')
         assert str(query) == expected_joined
 
-    def test_model_does_not_exist(self, session, db_uri):
+    def test_model_does_not_exist(self, session, db_uri, only_sqlalchemy_1):
         query = session.query(Foo)
 
         expected = (

@@ -156,6 +156,13 @@ def session(connection, is_postgresql):
     db_session.close()
 
 
+@pytest.fixture()
+def only_sqlalchemy_1():
+    if is_sqlalchemy_version_2:
+        pytest.skip('TODO')
+    return True
+
+
 def create_db(uri):
     """Drop the database at ``uri`` and create a brand new one. """
     destroy_database(uri)

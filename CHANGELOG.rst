@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Forsk 31/05/2023:
+* Added support for SQLAlchemy2 (only query(), select() is not handled)
+------
+
+Forsk 2022-2023:
+* Added support for association_proxy (None values are filtered, is_null doesn't work)
+
+------
+
 Here you can see the full list of changes between sqlalchemy-filters
 versions, where semantic versioning is used: *major.minor.patch*.
 

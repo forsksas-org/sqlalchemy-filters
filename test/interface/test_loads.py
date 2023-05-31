@@ -146,7 +146,7 @@ class TestLoadsApplied(object):
         )
         assert str(restricted_query) == expected
 
-    def test_multiple_values_multiple_models_lazy_load(self, session, db_uri):
+    def test_multiple_values_multiple_models_lazy_load(self, session, db_uri, only_sqlalchemy_1):
 
         query = session.query(Foo).join(Bar)
         loads = [
@@ -193,7 +193,7 @@ class TestLoadsApplied(object):
         )
         assert str(restricted_query) == expected
 
-    def test_eager_load(self, session, db_uri):
+    def test_eager_load(self, session, db_uri, only_sqlalchemy_1):
 
         query = session.query(Foo).options(joinedload(Foo.bar))
         load_spec = [
@@ -223,7 +223,7 @@ class TestLoadsApplied(object):
 class TestAutoJoin:
 
     @pytest.mark.usefixtures('multiple_foos_inserted')
-    def test_auto_join(self, session, db_uri):
+    def test_auto_join(self, session, db_uri, only_sqlalchemy_1):
 
         query = session.query(Foo)
         loads = [

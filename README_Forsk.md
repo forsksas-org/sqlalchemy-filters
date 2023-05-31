@@ -13,4 +13,4 @@ Ctrl + Maj + P: Python clear cache and reload window
 
 Lancer pytest depuis VSCode **en séquentiel** (filtrer si besoin)
 
-Note : les tests d'autojoin, lazy_load et eager_load sont HS en 2.0
+Note : les tests d'autojoin, lazy_load et eager_load sont HS en 2.0 (voir "only_sqlalchemy_1")
