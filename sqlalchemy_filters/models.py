@@ -14,6 +14,13 @@ def sqlalchemy_version_lt(version):
     return tuple(sqlalchemy_version.split('.')) < tuple(version.split('.'))
 
 
+is_sqlalchemy_version_2 = tuple(sqlalchemy_version.split('.')) >= ('2',)
+
+if is_sqlalchemy_version_2:
+    from sqlalchemy.ext.hybrid import HybridExtensionType
+    from sqlalchemy.ext.associationproxy import AssociationProxyExtensionType
+
+
 class Field(object):
 
     def __init__(self, model, field_name):
@@ -50,24 +57,31 @@ class Field(object):
         return set(column_names) | set(accepted_descriptors)
 
 
-def _is_hybrid_property(orm_descriptor):
-    return orm_descriptor.extension_type == symbol('HYBRID_PROPERTY')
+# def _is_hybrid_property(orm_descriptor):
+#     return orm_descriptor.extension_type == symbol('HYBRID_PROPERTY')
 
 
-def _is_hybrid_method(orm_descriptor):
-    return orm_descriptor.extension_type == symbol('HYBRID_METHOD')
+# def _is_hybrid_method(orm_descriptor):
+#     return orm_descriptor.extension_type == symbol('HYBRID_METHOD')
 
 
-def _is_association_proxy(orm_descriptor):
-    return orm_descriptor.extension_type == symbol('ASSOCIATION_PROXY')
+# def _is_association_proxy(orm_descriptor):
+#     return orm_descriptor.extension_type == symbol('ASSOCIATION_PROXY')
 
 
 def _is_accepted_orm_descriptor(orm_descriptor):
-    return orm_descriptor.extension_type in [
-        symbol('HYBRID_PROPERTY'),
-        symbol('HYBRID_METHOD'),
-        symbol('ASSOCIATION_PROXY')
-      ]
+    if is_sqlalchemy_version_2:
+        return orm_descriptor.extension_type in [
+            HybridExtensionType.HYBRID_PROPERTY,
+            HybridExtensionType.HYBRID_METHOD,
+            AssociationProxyExtensionType.ASSOCIATION_PROXY
+        ]
+    else:
+        return orm_descriptor.extension_type in [
+            symbol('HYBRID_PROPERTY'),
+            symbol('HYBRID_METHOD'),
+            symbol('ASSOCIATION_PROXY')
+        ]
 
 
 def get_model_from_table(table):  # pragma: nocover
@@ -106,7 +120,12 @@ def get_query_models(query):
         except InvalidRequestError:
             # query might not contain columns yet, hence cannot be compiled
             # try to infer the models from various internals
-            for table_tuple in query._setup_joins + query._legacy_setup_joins:
+            if is_sqlalchemy_version_2:
+                joins = query._setup_joins
+            else:
+                joins = query._legacy_setup_joins
+
+            for table_tuple in joins:
                 model_class = get_model_from_table(table_tuple[0])
                 if model_class:
                     models.append(model_class)

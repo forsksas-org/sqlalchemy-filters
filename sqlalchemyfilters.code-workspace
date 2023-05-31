@@ -1,0 +1,66 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "files.trimTrailingWhitespace": true,
+        "[markdown]": {
+            "files.trimTrailingWhitespace": false
+        },
+        "files.eol": "\n",
+        "git.autofetch": true,
+        "git.allowForcePush": true,
+        "python.terminal.activateEnvironment": true,
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": [
+            "${workspaceFolder}/test/",
+            "-v",
+            "-s",
+            "-rsx"
+        ],
+        "python.linting.pycodestyleEnabled": false,
+        "python.linting.pylintEnabled": false,
+        "python.linting.flake8Enabled": true,
+        "python.linting.enabled": true,
+        "python.envFile": "",
+        "python.formatting.provider": "autopep8",
+        "[python]": { "editor.formatOnSave": true },
+        "files.exclude": {
+            "**/.venv": true,
+            "**/*.pyc": true,
+            "**/__pycache__": true,
+        },
+        "files.watcherExclude": {
+            "**/.git/objects/**": true,
+            "**/.git/subtree-cache/**": true,
+            // "**/.tox/**": true,
+        },
+    },
+    "launch": {
+        "configurations": [
+            {
+                "name": "Python: Current File",
+                "type": "python",
+                "request": "launch",
+                "program": "${file}",
+                "console": "internalConsole",
+                "internalConsoleOptions": "openOnSessionStart",
+                "env": {
+                    "NAOS_SERVICE_ENV": "development"
+                },
+            },
+            {
+                "name": "Debug Tests",
+                "type": "python",
+                "request": "launch",
+                "console": "integratedTerminal",
+                "justMyCode": false
+            }
+        ]
+    }
+}
