@@ -57,18 +57,6 @@ class Field(object):
         return set(column_names) | set(accepted_descriptors)
 
 
-# def _is_hybrid_property(orm_descriptor):
-#     return orm_descriptor.extension_type == symbol('HYBRID_PROPERTY')
-
-
-# def _is_hybrid_method(orm_descriptor):
-#     return orm_descriptor.extension_type == symbol('HYBRID_METHOD')
-
-
-# def _is_association_proxy(orm_descriptor):
-#     return orm_descriptor.extension_type == symbol('ASSOCIATION_PROXY')
-
-
 def _is_accepted_orm_descriptor(orm_descriptor):
     if is_sqlalchemy_version_2:
         return orm_descriptor.extension_type in [
