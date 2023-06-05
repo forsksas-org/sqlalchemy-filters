@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Forsk 31/05/2023:
+0.12.3.fsk-rev-2 31/05/2023:
 * Added support for SQLAlchemy2 (only query(), select() is not handled)
 * Dropped support for SQLAlchemy < 1.4
 * Dropped support for python2
