@@ -3,7 +3,6 @@
 import datetime
 
 import pytest
-from six import string_types
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
@@ -12,7 +11,7 @@ from sqlalchemy_filters.exceptions import (
     BadFilterFormat, BadSpec, FieldNotFound
 )
 
-from test.models import Foo, Bar, Qux, Corge
+from test.models import Assoc, AssocSub, Foo, Bar, Qux, Corge
 
 
 ARRAY_NOT_SUPPORTED = (
@@ -24,6 +23,17 @@ STRING_DATE_TIME_NOT_SUPPORTED = (
     "TODO: String Time / DateTime values currently not working as filters by "
     "SQLite"
 )
+
+
+@pytest.fixture
+def multiple_assoc_inserted(session):
+    sub_1 = AssocSub(id=1, name='sub_name_1', count=5)
+    session.add_all([sub_1])
+
+    assoc_1 = Assoc(id=1, name='name_1', count=5, sub_id=1)
+    assoc_2 = Assoc(id=2, name='name_2', count=10, sub_id=None)
+    session.add_all([assoc_1, assoc_2])
+    session.commit()
 
 
 @pytest.fixture
@@ -805,7 +815,7 @@ class TestTimeFields:
     )
     @pytest.mark.usefixtures('multiple_quxs_inserted')
     def test_filter_time_equality(self, session, is_sqlite, value):
-        if isinstance(value, string_types) and is_sqlite:
+        if isinstance(value, str) and is_sqlite:
             pytest.skip(STRING_DATE_TIME_NOT_SUPPORTED)
 
         query = session.query(Qux)
@@ -826,7 +836,7 @@ class TestTimeFields:
     )
     @pytest.mark.usefixtures('multiple_quxs_inserted')
     def test_filter_multiple_times(self, session, is_sqlite, value):
-        if isinstance(value, string_types) and is_sqlite:
+        if isinstance(value, str) and is_sqlite:
             pytest.skip(STRING_DATE_TIME_NOT_SUPPORTED)
 
         query = session.query(Qux)
@@ -867,7 +877,7 @@ class TestDateTimeFields:
     )
     @pytest.mark.usefixtures('multiple_quxs_inserted')
     def test_filter_datetime_equality(self, session, is_sqlite, value):
-        if isinstance(value, string_types) and is_sqlite:
+        if isinstance(value, str) and is_sqlite:
             pytest.skip(STRING_DATE_TIME_NOT_SUPPORTED)
 
         query = session.query(Qux)
@@ -895,7 +905,7 @@ class TestDateTimeFields:
     )
     @pytest.mark.usefixtures('multiple_quxs_inserted')
     def test_filter_multiple_datetimes(self, session, is_sqlite, value):
-        if isinstance(value, string_types) and is_sqlite:
+        if isinstance(value, str) and is_sqlite:
             pytest.skip(STRING_DATE_TIME_NOT_SUPPORTED)
 
         query = session.query(Qux)
@@ -1316,3 +1326,23 @@ class TestHybridAttributes:
         assert set(map(type, quxs)) == {Qux}
         assert {qux.id for qux in quxs} == {4}
         assert {qux.three_times_count() for qux in quxs} == {45}
+
+    @pytest.mark.usefixtures('multiple_assoc_inserted')
+    def test_filter_by_association_proxy(self, session):
+        query = session.query(Assoc)
+        filters = [
+            {
+                'model': 'Assoc',
+                'field': 'sub_name',
+                'op': '==',
+                'value': 'sub_name_1'
+            },
+        ]
+
+        filtered_query = apply_filters(query, filters)
+        result = filtered_query.all()
+
+        assert len(result) == 1
+        assocs = result
+        assert set(map(type, assocs)) == {Assoc}
+        assert {assoc.id for assoc in assocs} == {1}

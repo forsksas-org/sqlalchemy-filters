@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import create_database, drop_database, database_exists
+from sqlalchemy_filters.models import is_sqlalchemy_version_2
 
 from test.models import Base, BasePostgresqlSpecific
 
@@ -131,7 +132,10 @@ def connection(db_uri, db_engine_options, is_postgresql):
 
     yield connection
 
-    Base.metadata.drop_all()
+    if is_sqlalchemy_version_2:
+        Base.metadata.drop_all(connection)
+    else:
+        Base.metadata.drop_all()
     destroy_database(db_uri)
 
 
@@ -150,6 +154,13 @@ def session(connection, is_postgresql):
 
     db_session.commit()
     db_session.close()
+
+
+@pytest.fixture()
+def only_sqlalchemy_1():
+    if is_sqlalchemy_version_2:
+        pytest.skip('TODO sqlalchemy 2')
+    return True
 
 
 def create_db(uri):

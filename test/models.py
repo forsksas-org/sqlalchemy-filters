@@ -6,6 +6,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
 
@@ -38,6 +39,7 @@ class Foo(Base):
 class Bar(Base):
 
     __tablename__ = 'bar'
+
     foos = relationship('Foo', back_populates='bar')
 
 
@@ -55,6 +57,22 @@ class Qux(Base):
     created_at = Column(Date)
     execution_time = Column(DateTime)
     expiration_time = Column(Time)
+
+
+class AssocSub(Base):
+
+    __tablename__ = 'assocsub'
+
+    assocs = relationship('Assoc', back_populates='sub')
+
+
+class Assoc(Base):
+
+    __tablename__ = 'assoc'
+
+    sub_id = Column(Integer, ForeignKey('assocsub.id'), nullable=True)
+    sub = relationship('AssocSub', back_populates='assocs')
+    sub_name = association_proxy('sub', 'name')
 
 
 class Corge(BasePostgresqlSpecific):
