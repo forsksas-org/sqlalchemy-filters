@@ -5,9 +5,10 @@ from inspect import signature
 from itertools import chain
 
 from sqlalchemy import and_, or_, not_, func
-
 from .exceptions import BadFilterFormat
 from .models import Field, auto_join, get_model_from_spec, get_default_model
+
+LIKE_ESCAPE_CHAR = '\\'
 
 
 BooleanFunction = namedtuple(
@@ -40,9 +41,9 @@ class Operator(object):
         'ge': lambda f, a: f >= a,
         '<=': lambda f, a: f <= a,
         'le': lambda f, a: f <= a,
-        'like': lambda f, a: f.like(a),
-        'ilike': lambda f, a: f.ilike(a),
-        'not_ilike': lambda f, a: ~f.ilike(a),
+        'like': lambda f, a: f.like(a, LIKE_ESCAPE_CHAR),
+        'ilike': lambda f, a: f.ilike(a, LIKE_ESCAPE_CHAR),
+        'not_ilike': lambda f, a: ~f.ilike(a, LIKE_ESCAPE_CHAR),
         'in': lambda f, a: f.in_(a),
         'not_in': lambda f, a: ~f.in_(a),
         'any': lambda f, a: f.any(a),

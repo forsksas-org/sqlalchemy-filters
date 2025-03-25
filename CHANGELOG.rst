@@ -1,6 +1,9 @@
 Release Notes
 =============
 
+0.12.5 25/03/2025:
+* Add default escape character for like operators
+
 0.12.4 31/05/2023:
 * Added support for SQLAlchemy2 (only query(), select() is not handled)
 * Dropped support for SQLAlchemy < 1.4
