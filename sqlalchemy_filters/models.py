@@ -2,7 +2,9 @@ from sqlalchemy import __version__ as sqlalchemy_version
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm import mapperlib
 from sqlalchemy.inspection import inspect
-from sqlalchemy.util import symbol
+from sqlalchemy.ext.hybrid import HybridExtensionType
+from sqlalchemy.ext.associationproxy import AssociationProxyExtensionType
+
 import types
 
 from .exceptions import BadQuery, FieldNotFound, BadSpec
@@ -15,10 +17,6 @@ def sqlalchemy_version_lt(version):
 
 
 is_sqlalchemy_version_2 = tuple(sqlalchemy_version.split('.')) >= ('2',)
-
-if is_sqlalchemy_version_2:
-    from sqlalchemy.ext.hybrid import HybridExtensionType
-    from sqlalchemy.ext.associationproxy import AssociationProxyExtensionType
 
 
 class Field(object):
@@ -58,18 +56,11 @@ class Field(object):
 
 
 def _is_accepted_orm_descriptor(orm_descriptor):
-    if is_sqlalchemy_version_2:
-        return orm_descriptor.extension_type in [
-            HybridExtensionType.HYBRID_PROPERTY,
-            HybridExtensionType.HYBRID_METHOD,
-            AssociationProxyExtensionType.ASSOCIATION_PROXY
-        ]
-    else:
-        return orm_descriptor.extension_type in [
-            symbol('HYBRID_PROPERTY'),
-            symbol('HYBRID_METHOD'),
-            symbol('ASSOCIATION_PROXY')
-        ]
+    return orm_descriptor.extension_type in [
+        HybridExtensionType.HYBRID_PROPERTY,
+        HybridExtensionType.HYBRID_METHOD,
+        AssociationProxyExtensionType.ASSOCIATION_PROXY
+    ]
 
 
 def get_model_from_table(table):  # pragma: nocover
@@ -102,18 +93,19 @@ def get_query_models(query):
             for mapper
             in query._compile_state()._join_entities
         )
-    except InvalidRequestError:
+    except (InvalidRequestError, AttributeError):
         # query might not contain columns yet, hence cannot be compiled
-        # try to infer the models from various internals
-        if is_sqlalchemy_version_2:
-            joins = query._setup_joins
-        else:
-            joins = query._legacy_setup_joins
+        # or query might be a sqla2.0 select statement
+        pass
+    # also try to infer the models from various internals
+    all_joins = query._setup_joins
+    if hasattr(query, "_legacy_setup_joins"):
+        all_joins += query._legacy_setup_joins
 
-        for table_tuple in joins:
-            model_class = get_model_from_table(table_tuple[0])
-            if model_class:
-                models.append(model_class)
+    for table_tuple in all_joins:
+        model_class = get_model_from_table(table_tuple[0])
+        if model_class:
+            models.append(model_class)
 
     # account also query.select_from entities
     model_class = None

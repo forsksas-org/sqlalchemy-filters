@@ -132,10 +132,7 @@ def connection(db_uri, db_engine_options, is_postgresql):
 
     yield connection
 
-    if is_sqlalchemy_version_2:
-        Base.metadata.drop_all(connection)
-    else:
-        Base.metadata.drop_all()
+    Base.metadata.drop_all(connection)
     destroy_database(db_uri)
 
 
