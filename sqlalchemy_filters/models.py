@@ -47,12 +47,17 @@ class Field(object):
         orm_descriptors = inspect_mapper.all_orm_descriptors
 
         column_names = columns.keys()
+        synonym_names = inspect_mapper.synonyms.keys()
         accepted_descriptors = [
             key for key, item in orm_descriptors.items()
             if _is_accepted_orm_descriptor(item)
         ]
 
-        return set(column_names) | set(accepted_descriptors)
+        return (
+            set(column_names) |
+            set(accepted_descriptors) |
+            set(synonym_names)
+        )
 
 
 def _is_accepted_orm_descriptor(orm_descriptor):

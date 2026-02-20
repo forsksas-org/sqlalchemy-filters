@@ -1,6 +1,9 @@
 Release Notes
 =============
 
+0.14.4 20/02/2025:
+* Add `synonyms` as supported filter fields
+
 0.14.0 24/11/2025:
 * SQLAlchemy 2 support
 * Drop SQLAlchemy 1 support
